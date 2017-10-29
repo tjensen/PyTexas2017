@@ -17,7 +17,7 @@ class TestRunService(unittest.TestCase):
             "SERVER_PORT": "8000"
         })
 
-        mock_application_class.assert_called_once_with([])
+        mock_application_class.assert_called_once_with(mock.ANY)
 
         mock_httpserver_class.assert_called_once_with(mock_application_class.return_value)
         mock_httpserver.listen.assert_called_once_with(8000)
