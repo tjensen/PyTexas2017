@@ -2,5 +2,7 @@ import tornado.web
 
 
 class HealthcheckHandler(tornado.web.RequestHandler):
-    def get(self):
+    async def get(self):
+        await self.settings["mongo_db"].command("ping")
+
         self.finish("OK")
