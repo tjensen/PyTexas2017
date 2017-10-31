@@ -3,6 +3,9 @@ import tornado.web
 
 class HealthcheckHandler(tornado.web.RequestHandler):
     async def get(self):
-        await self.settings["mongo_db"].command("ping")
+        await tornado.gen.multi([
+            self.settings["mongo_db"].command("ping"),
+            self.settings["redis"].ping()
+        ])
 
         self.finish("OK")

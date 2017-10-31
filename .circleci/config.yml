@@ -8,6 +8,7 @@ jobs:
     docker:
       - image: circleci/python:3.6
       - image: circleci/mongo:latest
+      - image: redis:latest
 
     working_directory: ~/repo
 
@@ -41,6 +42,8 @@ jobs:
           name: run tests
           command: |
             export MONGODB_URI=mongodb://localhost/testing
+            export REDIS_HOST=localhost
+            export REDIS_PORT=6379
 
             . venv/bin/activate
             nosetests -v --with-xunit --xunit-file=test-reports/nosetests.xml
