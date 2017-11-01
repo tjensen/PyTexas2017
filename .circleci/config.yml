@@ -9,6 +9,7 @@ jobs:
       - image: circleci/python:3.6
       - image: circleci/mongo:latest
       - image: redis:latest
+      - image: circleci/mysql:latest
 
     working_directory: ~/repo
 
@@ -44,6 +45,11 @@ jobs:
             export MONGODB_URI=mongodb://localhost/testing
             export REDIS_HOST=localhost
             export REDIS_PORT=6379
+            export MYSQL_HOST=localhost
+            export MYSQL_PORT=3306
+            export MYSQL_DATABASE=testing
+            export MYSQL_USER=root
+            export MYSQL_PASSWORD=
 
             . venv/bin/activate
             nosetests -v --with-xunit --xunit-file=test-reports/nosetests.xml
