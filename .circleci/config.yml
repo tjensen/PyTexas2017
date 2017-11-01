@@ -15,11 +15,14 @@ jobs:
           MYSQL_PORT: 3306
           MYSQL_DATABASE: testing
           MYSQL_USER: root
-          MYSQL_PASSWORD: ""
+          MYSQL_PASSWORD: password
 
       - image: circleci/mongo:3.5
       - image: redis:3.2-alpine
       - image: circleci/mysql:8.0
+        environment:
+          MYSQL_ROOT_HOST: "%"
+          MYSQL_ROOT_PASSWORD: password
 
     working_directory: ~/repo
 
