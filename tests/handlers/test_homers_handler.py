@@ -6,9 +6,10 @@ import motor.motor_tornado
 import tornado.testing
 
 from run_service import make_app
+from tests.handlers.handler_test_case import HandlerTestCase
 
 
-class TestHomersHandler(tornado.testing.AsyncHTTPTestCase):
+class TestHomersHandler(HandlerTestCase):
     def tearDown(self):
         self.io_loop.run_sync(lambda: self.motor_client.drop_database(self.mongo_db))
 
@@ -22,14 +23,6 @@ class TestHomersHandler(tornado.testing.AsyncHTTPTestCase):
             "motor_client": self.motor_client,
             "mongo_db": self.mongo_db
         })
-
-    async def fetch(self, path, method="GET", body=None):
-        # Override AsyncHTTPTestCase's fetch method because it stops the IOLoop
-        return await self.http_client.fetch(
-            self.get_url(path),
-            method=method,
-            body=body,
-            raise_error=False)
 
     @tornado.testing.gen_test
     async def test_get_returns_404_when_document_does_not_exist_in_database(self):

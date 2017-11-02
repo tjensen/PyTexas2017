@@ -1,20 +1,17 @@
 import os
 
 import aioredis
-import tornado.platform.asyncio
 import tornado.testing
 
 from run_service import make_app
+from tests.handlers.handler_test_case import HandlerTestCase
 
 
-class TestMargesHandler(tornado.testing.AsyncHTTPTestCase):
+class TestMargesHandler(HandlerTestCase):
     def tearDown(self):
         self.io_loop.run_sync(self.redis.flushdb)
 
         super().tearDown()
-
-    def get_new_ioloop(self):
-        return tornado.platform.asyncio.AsyncIOLoop()
 
     def get_app(self):
         self.redis = self.io_loop.run_sync(
@@ -23,14 +20,6 @@ class TestMargesHandler(tornado.testing.AsyncHTTPTestCase):
         return make_app({
             "redis": self.redis
         })
-
-    async def fetch(self, path, method="GET", body=None):
-        # Override AsyncHTTPTestCase's fetch method because it stops the IOLoop
-        return await self.http_client.fetch(
-            self.get_url(path),
-            method=method,
-            body=body,
-            raise_error=False)
 
     @tornado.testing.gen_test
     async def test_get_returns_404_when_key_does_not_exist_in_redis(self):

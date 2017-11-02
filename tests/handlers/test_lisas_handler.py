@@ -1,13 +1,13 @@
 import os
 
 import aiomysql
-import tornado.platform.asyncio
 import tornado.testing
 
 from run_service import make_app
+from tests.handlers.handler_test_case import HandlerTestCase
 
 
-class TestLisasHandler(tornado.testing.AsyncHTTPTestCase):
+class TestLisasHandler(HandlerTestCase):
     def tearDown(self):
         self.io_loop.run_sync(lambda: self.teardown_database(self.mysql))
 
@@ -44,23 +44,12 @@ CREATE TABLE lisa (
             await cursor.execute(f"DROP DATABASE {os.environ['MYSQL_DATABASE']}")
         db.close()
 
-    def get_new_ioloop(self):
-        return tornado.platform.asyncio.AsyncIOLoop()
-
     def get_app(self):
         self.mysql = self.io_loop.run_sync(self.setup_database)
 
         return make_app({
             "mysql": self.mysql
         })
-
-    async def fetch(self, path, method="GET", body=None):
-        # Override AsyncHTTPTestCase's fetch method because it stops the IOLoop
-        return await self.http_client.fetch(
-            self.get_url(path),
-            method=method,
-            body=body,
-            raise_error=False)
 
     @tornado.testing.gen_test
     async def test_get_returns_404_when_key_does_not_exist_in_mysql(self):
