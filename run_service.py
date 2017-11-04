@@ -51,7 +51,7 @@ def main(environ):
     })
 
     server = tornado.httpserver.HTTPServer(app)
-    server.listen(int(environ["SERVER_PORT"]))
+    server.listen(int(environ["SERVER_PORT"]), "localhost")
 
     event_loop.run_forever()
 

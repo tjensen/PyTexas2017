@@ -74,6 +74,6 @@ class TestRunService(unittest.TestCase):
             s3_object="aws-s3-object")
 
         mock_httpserver_class.assert_called_once_with(mock_application_class.return_value)
-        mock_httpserver.listen.assert_called_once_with(8000)
+        mock_httpserver.listen.assert_called_once_with(8000, "localhost")
 
         mock_eventloop.run_forever.assert_called_once_with()
