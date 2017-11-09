@@ -6,12 +6,7 @@ import tornado.gen
 import tornado.testing
 
 from service.mysql.initialize import connect, destroy, initialize, main
-
-
-def future_returning(result):
-    future = tornado.gen.Future()
-    future.set_result(result)
-    return future
+from tests.helpers import future_returning
 
 
 class TestInitialize(tornado.testing.AsyncTestCase):
