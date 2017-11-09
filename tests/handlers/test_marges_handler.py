@@ -1,9 +1,8 @@
 import os
 
-import aioredis
 import tornado.testing
 
-from run_service import make_app
+from run_service import make_app, connect_redis
 from tests.handlers.handler_test_case import HandlerTestCase
 
 
@@ -14,8 +13,7 @@ class TestMargesHandler(HandlerTestCase):
         super().tearDown()
 
     def get_app(self):
-        self.redis = self.io_loop.run_sync(
-            lambda: aioredis.create_redis((os.environ["REDIS_HOST"], os.environ["REDIS_PORT"])))
+        self.redis = self.io_loop.run_sync(lambda: connect_redis(os.environ))
 
         return make_app({
             "redis": self.redis

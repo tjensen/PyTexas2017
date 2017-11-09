@@ -3,7 +3,8 @@ import os
 import aiomysql
 import tornado.testing
 
-from run_service import make_app
+from run_service import make_app, connect_mysql
+from service.mysql.initialize import destroy, initialize
 from tests.handlers.handler_test_case import HandlerTestCase
 
 
@@ -13,43 +14,20 @@ class TestLisasHandler(HandlerTestCase):
 
         super().tearDown()
 
-    async def setup_database(self):
-        db = await aiomysql.connect(
-            host=os.environ["MYSQL_HOST"], port=int(os.environ["MYSQL_PORT"]),
-            user=os.environ["MYSQL_USER"], password=os.environ["MYSQL_PASSWORD"])
-        async with db.cursor() as cursor:
-            await cursor.execute(f"CREATE DATABASE {os.environ['MYSQL_DATABASE']}")
-        db.close()
-
-        db = await aiomysql.connect(
-            host=os.environ["MYSQL_HOST"], port=int(os.environ["MYSQL_PORT"]),
-            db=os.environ["MYSQL_DATABASE"], user=os.environ["MYSQL_USER"],
-            password=os.environ["MYSQL_PASSWORD"])
-        async with db.cursor() as cursor:
-            await cursor.execute("""\
-CREATE TABLE lisa (
-    name VARCHAR(32) NOT NULL,
-    content VARCHAR(1000) NOT NULL,
-    PRIMARY KEY (name)
-);""")
-        return db
-
-    async def teardown_database(self, db):
-        db.close()
-
-        db = await aiomysql.connect(
-            host=os.environ["MYSQL_HOST"], port=int(os.environ["MYSQL_PORT"]),
-            user=os.environ["MYSQL_USER"], password=os.environ["MYSQL_PASSWORD"])
-        async with db.cursor() as cursor:
-            await cursor.execute(f"DROP DATABASE {os.environ['MYSQL_DATABASE']}")
-        db.close()
-
     def get_app(self):
         self.mysql = self.io_loop.run_sync(self.setup_database)
 
         return make_app({
             "mysql": self.mysql
         })
+
+    async def setup_database(self):
+        await initialize(os.environ)
+        return await connect_mysql(os.environ)
+
+    async def teardown_database(self, db):
+        db.close()
+        await destroy(os.environ)
 
     @tornado.testing.gen_test
     async def test_get_returns_404_when_key_does_not_exist_in_mysql(self):
