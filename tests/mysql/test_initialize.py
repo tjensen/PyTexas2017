@@ -1,12 +1,13 @@
 import os
+import unittest
 from unittest import mock
 
 import aiomysql
 import tornado.gen
 import tornado.testing
 
-from service.mysql.initialize import connect, destroy, initialize, main
-from tests.helpers import future_returning
+from run_service import connect_mysql
+from service.mysql.initialize import destroy, initialize, main
 
 
 class TestInitialize(tornado.testing.AsyncTestCase):
@@ -18,35 +19,11 @@ class TestInitialize(tornado.testing.AsyncTestCase):
     def get_new_ioloop(self):
         return tornado.platform.asyncio.AsyncIOLoop()
 
-    @mock.patch("aiomysql.connect")
-    @tornado.testing.gen_test
-    async def test_connect_connects_to_mysql(self, mock_connect):
-        mock_connect.return_value = future_returning(None)
-
-        await connect(os.environ)
-
-        mock_connect.assert_called_once_with(
-            host=os.environ["MYSQL_HOST"], port=int(os.environ["MYSQL_PORT"]),
-            db=os.environ["MYSQL_DATABASE"], user=os.environ["MYSQL_USER"],
-            password=os.environ["MYSQL_PASSWORD"])
-
-    @mock.patch("aiomysql.connect")
-    @tornado.testing.gen_test
-    async def test_connect_connects_to_mysql_without_db_when_use_database_is_false(
-            self, mock_connect):
-        mock_connect.return_value = future_returning(None)
-
-        await connect(os.environ, use_database=False)
-
-        mock_connect.assert_called_once_with(
-            host=os.environ["MYSQL_HOST"], port=int(os.environ["MYSQL_PORT"]),
-            user=os.environ["MYSQL_USER"], password=os.environ["MYSQL_PASSWORD"])
-
     @tornado.testing.gen_test
     async def test_initialize_creates_database_and_table(self):
         await initialize(os.environ)
 
-        db = await connect(os.environ)
+        db = await connect_mysql(os.environ)
         try:
             async with db.cursor(aiomysql.DictCursor) as cursor:
                 await cursor.execute("DESCRIBE lisa;")
@@ -74,10 +51,11 @@ class TestInitialize(tornado.testing.AsyncTestCase):
         finally:
             db.close()
 
+
+class TestMain(unittest.TestCase):
     @mock.patch("asyncio.get_event_loop")
     @mock.patch("service.mysql.initialize.initialize")
-    @tornado.testing.gen_test
-    async def test_main_calls_initialize_on_event_loop(self, mock_initialize, mock_get_event_loop):
+    def test_main_calls_initialize_on_event_loop(self, mock_initialize, mock_get_event_loop):
         main(os.environ)
 
         mock_initialize.assert_called_once_with(os.environ)

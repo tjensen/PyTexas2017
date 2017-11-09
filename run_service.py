@@ -33,6 +33,16 @@ def make_app(config):
     ], **config)
 
 
+async def connect_redis(environ):
+    return await aioredis.create_redis((environ["REDIS_HOST"], environ["REDIS_PORT"]))
+
+
+async def connect_mysql(environ):
+    return await aiomysql.connect(
+        host=environ["MYSQL_HOST"], port=int(environ["MYSQL_PORT"]), db=environ["MYSQL_DATABASE"],
+        user=environ["MYSQL_USER"], password=environ["MYSQL_PASSWORD"])
+
+
 def main(environ):
     tornado.platform.asyncio.AsyncIOMainLoop().install()
     ioloop = tornado.ioloop.IOLoop.current()
@@ -40,12 +50,9 @@ def main(environ):
     motor_client = motor.motor_tornado.MotorClient(environ["MONGODB_URI"])
     mongo_db = motor_client.get_default_database()
 
-    redis = ioloop.run_sync(functools.partial(
-        aioredis.create_redis, (environ["REDIS_HOST"], environ["REDIS_PORT"])))
-    mysql = ioloop.run_sync(functools.partial(
-        aiomysql.connect, host=environ["MYSQL_HOST"], port=int(environ["MYSQL_PORT"]),
-        db=environ["MYSQL_DATABASE"], user=environ["MYSQL_USER"],
-        password=environ["MYSQL_PASSWORD"]))
+    redis = ioloop.run_sync(functools.partial(connect_redis, environ))
+
+    mysql = ioloop.run_sync(functools.partial(connect_mysql, environ))
 
     s3_bucket = boto3.resource("s3").Bucket(environ["AWS_S3_BUCKET"])
 

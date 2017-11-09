@@ -3,8 +3,8 @@ import os
 import aiomysql
 import tornado.testing
 
-from run_service import make_app
-from service.mysql.initialize import connect, destroy, initialize
+from run_service import make_app, connect_mysql
+from service.mysql.initialize import destroy, initialize
 from tests.handlers.handler_test_case import HandlerTestCase
 
 
@@ -23,7 +23,7 @@ class TestLisasHandler(HandlerTestCase):
 
     async def setup_database(self):
         await initialize(os.environ)
-        return await connect(os.environ)
+        return await connect_mysql(os.environ)
 
     async def teardown_database(self, db):
         db.close()
