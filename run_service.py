@@ -14,7 +14,12 @@ from service.handlers.bart_handler import BartHandler
 from service.handlers.healthcheck_handler import HealthcheckHandler
 from service.handlers.homers_handler import HomersHandler
 from service.handlers.lisas_handler import LisasHandler
+from service.handlers.maggie_handler import MaggieHandler
 from service.handlers.marges_handler import MargesHandler
+
+
+WEATHER_URI = "https://query.yahooapis.com/v1/public/yql?q=select%20item.condition" \
+    "%20from%20weather.forecast%20where%20woeid%20%3D%202357536&format=json"
 
 
 def make_app(config):
@@ -23,6 +28,7 @@ def make_app(config):
         ("/api/v1/healthcheck", HealthcheckHandler),
         ("/api/v1/homers/(.*)", HomersHandler),
         ("/api/v1/lisas/(.*)", LisasHandler),
+        ("/api/v1/maggie", MaggieHandler),
         ("/api/v1/marges/(.*)", MargesHandler)
     ], **config)
 
@@ -49,7 +55,8 @@ def main(environ):
         "redis": redis,
         "mysql": mysql,
         "s3_bucket": s3_bucket,
-        "s3_object": environ["AWS_S3_OBJECT"]
+        "s3_object": environ["AWS_S3_OBJECT"],
+        "weather_uri": WEATHER_URI
     })
 
     server = tornado.httpserver.HTTPServer(app)

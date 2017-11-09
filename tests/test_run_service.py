@@ -83,7 +83,8 @@ class TestRunService(unittest.TestCase):
             redis=mock_redis,
             mysql=mock_mysql,
             s3_bucket=mock_bucket,
-            s3_object="aws-s3-object")
+            s3_object="aws-s3-object",
+            weather_uri=run_service.WEATHER_URI)
 
         mock_httpserver_class.assert_called_once_with(mock_application_class.return_value)
         mock_httpserver.listen.assert_called_once_with(8000, "localhost")
