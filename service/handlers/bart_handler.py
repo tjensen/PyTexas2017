@@ -19,14 +19,18 @@ class BartHandler(tornado.web.RequestHandler):
 
     @tornado.concurrent.run_on_executor
     def _download(self):
+        contents = io.BytesIO()
+
         self.settings["s3_bucket"].download_fileobj(
             Key=self.settings["s3_object"],
-            Fileobj=self)
+            Fileobj=contents)
+
+        return contents.getvalue()
 
     async def get(self):
-        await tornado.platform.asyncio.to_tornado_future(self._download())
+        contents = await tornado.platform.asyncio.to_tornado_future(self._download())
 
-        self.finish()
+        self.finish(contents)
 
     async def post(self):
         await tornado.platform.asyncio.to_tornado_future(self._upload())
