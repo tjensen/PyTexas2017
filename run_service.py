@@ -11,6 +11,7 @@ import tornado.platform.asyncio
 import tornado.web
 
 from service.handlers.bart_handler import BartHandler
+from service.handlers.flanders_handler import FlandersHandler
 from service.handlers.healthcheck_handler import HealthcheckHandler
 from service.handlers.homers_handler import HomersHandler
 from service.handlers.lisas_handler import LisasHandler
@@ -25,6 +26,7 @@ WEATHER_URI = "https://query.yahooapis.com/v1/public/yql?q=select%20item.conditi
 def make_app(config):
     return tornado.web.Application([
         ("/api/v1/bart", BartHandler),
+        ("/api/v1/flanders", FlandersHandler),
         ("/api/v1/healthcheck", HealthcheckHandler),
         ("/api/v1/homers/(.*)", HomersHandler),
         ("/api/v1/lisas/(.*)", LisasHandler),
