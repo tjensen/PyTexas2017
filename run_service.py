@@ -49,14 +49,19 @@ def main(environ):
     tornado.platform.asyncio.AsyncIOMainLoop().install()
     ioloop = tornado.ioloop.IOLoop.current()
 
-    motor_client = motor.motor_tornado.MotorClient(environ["MONGODB_URI"])
+    motor_client = motor.motor_tornado.MotorClient(
+        environ["MONGODB_URI"])
+
     mongo_db = motor_client.get_default_database()
 
-    redis = ioloop.run_sync(functools.partial(connect_redis, environ))
+    redis = ioloop.run_sync(functools.partial(
+        connect_redis, environ))
 
-    mysql = ioloop.run_sync(functools.partial(connect_mysql, environ))
+    mysql = ioloop.run_sync(functools.partial(
+        connect_mysql, environ))
 
-    s3_bucket = boto3.resource("s3").Bucket(environ["AWS_S3_BUCKET"])
+    s3_bucket = boto3.resource("s3").Bucket(
+        environ["AWS_S3_BUCKET"])
 
     app = make_app({
         "motor_client": motor_client,
