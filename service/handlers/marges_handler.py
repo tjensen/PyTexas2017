@@ -6,7 +6,8 @@ class MargesHandler(tornado.web.RequestHandler):
         marge = await self.settings["redis"].get(name)
 
         if marge is None:
-            raise tornado.web.HTTPError(404, f"Missing marge: {name}")
+            raise tornado.web.HTTPError(
+                404, f"Missing marge: {name}")
 
         self.finish(marge)
 

@@ -3,7 +3,6 @@ import os
 
 import aiomysql
 import aioredis
-import boto3
 import motor.motor_tornado
 import tornado.httpserver
 import tornado.ioloop
@@ -17,6 +16,7 @@ from service.handlers.homers_handler import HomersHandler
 from service.handlers.lisas_handler import LisasHandler
 from service.handlers.maggie_handler import MaggieHandler
 from service.handlers.marges_handler import MargesHandler
+from service.s3_object import S3Object
 
 
 WEATHER_URI = "https://query.yahooapis.com/v1/public/yql?q=select%20item.condition" \
@@ -36,13 +36,19 @@ def make_app(config):
 
 
 async def connect_redis(environ):
-    return await aioredis.create_redis((environ["REDIS_HOST"], environ["REDIS_PORT"]))
+    return await aioredis.create_redis(
+        (
+            environ["REDIS_HOST"], environ["REDIS_PORT"]
+        ))
 
 
 async def connect_mysql(environ):
     return await aiomysql.connect(
-        host=environ["MYSQL_HOST"], port=int(environ["MYSQL_PORT"]), db=environ["MYSQL_DATABASE"],
-        user=environ["MYSQL_USER"], password=environ["MYSQL_PASSWORD"])
+        host=environ["MYSQL_HOST"],
+        port=int(environ["MYSQL_PORT"]),
+        db=environ["MYSQL_DATABASE"],
+        user=environ["MYSQL_USER"],
+        password=environ["MYSQL_PASSWORD"])
 
 
 def main(environ):
@@ -60,16 +66,14 @@ def main(environ):
     mysql = ioloop.run_sync(functools.partial(
         connect_mysql, environ))
 
-    s3_bucket = boto3.resource("s3").Bucket(
-        environ["AWS_S3_BUCKET"])
+    s3_object = S3Object(environ["AWS_S3_BUCKET"], environ["AWS_S3_OBJECT"])
 
     app = make_app({
         "motor_client": motor_client,
         "mongo_db": mongo_db,
         "redis": redis,
         "mysql": mysql,
-        "s3_bucket": s3_bucket,
-        "s3_object": environ["AWS_S3_OBJECT"],
+        "s3_object": s3_object,
         "weather_uri": WEATHER_URI
     })
 

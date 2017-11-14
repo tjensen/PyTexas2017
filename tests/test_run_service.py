@@ -12,22 +12,21 @@ class TestRunService(tornado.testing.AsyncTestCase):
     @mock.patch("tornado.platform.asyncio.AsyncIOMainLoop", autospec=True)
     @mock.patch("tornado.httpserver.HTTPServer", autospec=True)
     @mock.patch("tornado.web.Application", autospec=True)
-    @mock.patch("boto3.resource", autospec=True)
+    @mock.patch("run_service.S3Object", autospec=True)
     @mock.patch("run_service.connect_mysql", autospec=True)
     @mock.patch("run_service.connect_redis", autospec=True)
     @mock.patch("motor.motor_tornado.MotorClient", autospec=True)
     def test_main_starts_service(
-            self, mock_motorclient_class, mock_connect_redis, mock_connect_mysql, mock_resource,
-            mock_application_class, mock_httpserver_class, mock_asynciomainloop_class, mock_partial,
-            mock_ioloop_class):
+            self, mock_motorclient_class, mock_connect_redis, mock_connect_mysql,
+            mock_s3_object_class, mock_application_class, mock_httpserver_class,
+            mock_asynciomainloop_class, mock_partial, mock_ioloop_class):
 
         mock_motorclient = mock_motorclient_class.return_value
         mock_mongo_db = mock_motorclient.get_default_database.return_value
         mock_httpserver = mock_httpserver_class.return_value
         mock_asynciomainloop = mock_asynciomainloop_class.return_value
         mock_ioloop = mock_ioloop_class.current.return_value
-        mock_s3 = mock_resource.return_value
-        mock_bucket = mock_s3.Bucket.return_value
+        mock_s3_object = mock_s3_object_class.return_value
 
         mock_redis = mock.Mock()
         mock_mysql = mock.Mock()
@@ -78,14 +77,15 @@ class TestRunService(tornado.testing.AsyncTestCase):
             ],
             mock_ioloop.run_sync.call_args_list)
 
+        mock_s3_object_class.assert_called_once_with("aws-s3-bucket", "aws-s3-object")
+
         mock_application_class.assert_called_once_with(
             mock.ANY,
             motor_client=mock_motorclient,
             mongo_db=mock_mongo_db,
             redis=mock_redis,
             mysql=mock_mysql,
-            s3_bucket=mock_bucket,
-            s3_object="aws-s3-object",
+            s3_object=mock_s3_object,
             weather_uri=run_service.WEATHER_URI)
 
         mock_httpserver_class.assert_called_once_with(mock_application_class.return_value)
