@@ -23,7 +23,8 @@ class S3Object(object):
         return contents.getvalue()
 
     async def download(self):
-        return await tornado.platform.asyncio.to_tornado_future(self._download())
+        return await tornado.platform.asyncio.to_tornado_future(
+            self._download())
 
     @tornado.concurrent.run_on_executor
     def _upload(self, data):
@@ -32,4 +33,5 @@ class S3Object(object):
             Fileobj=io.BytesIO(data))
 
     async def upload(self, data):
-        await tornado.platform.asyncio.to_tornado_future(self._upload(data))
+        await tornado.platform.asyncio.to_tornado_future(
+            self._upload(data))
