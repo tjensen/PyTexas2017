@@ -3,8 +3,8 @@
 [![CircleCI](https://circleci.com/gh/tjensen/PyTexas2017.svg?style=shield&circle-token=e8fffca922a554caaf89786ffb4be30a5ea11fa2)](https://circleci.com/gh/tjensen/PyTexas2017)
 
 This repository contains the complete example code from my PyTexas 2017 talk,
-"Building Asynchronous Microservices with Tornado." The code requires Python
-3.6.
+"[Building Asynchronous Microservices with Tornado](http://talks.ustud.io/talks/asynchronous-microservices-tornado/)."
+The code requires Python 3.6.
 
 ## How to Run
 
